@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  <h2>{{ title }}</h2>
+  <p>{{ message }}</p>
+  {% if errors %}
+  <ul>
+    {% for error in errors %}
+    <li class="warn">{{ error }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  <a class="button secondary" href="{{ back }}">返回首页</a>
+</section>
+{% endblock %}

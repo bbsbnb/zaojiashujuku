@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .analytics-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 18px; }
+  .analytics-card { padding: 20px; }
+  .analytics-value { margin: 8px 0 0; font-size: 28px; font-weight: 900; }
+  .mini-bar { height: 8px; border-radius: 8px; background: #e8edf1; overflow: hidden; }
+  .mini-bar span { display:block; height: 100%; background: #00957f; }
+</style>
+
+<section class="card" style="padding: 28px;">
+  <div class="page-heading" style="margin-top:0;">
+    <div>
+      <h1>历史对比与趋势</h1>
+      <p>用已导入项目和价格记录生成单方指标、类似项目对比和价格年度趋势。</p>
+    </div>
+    <a class="button secondary" href="{{ back }}">返回首页</a>
+  </div>
+  <p class="muted">当前资料库：<code>{{ stats.library }}</code></p>
+  <form method="get" action="/analytics" class="grid" style="grid-template-columns: repeat(5, minmax(0, 1fr));">
+    <input type="hidden" name="library" value="{{ stats.library }}">
+    <div>
+      <label>名称/规格关键词</label>
+      <input name="q" value="{{ filters.q }}" placeholder="如 C30、钢筋、普工">
+    </div>
+    <div>
+      <label>地区</label>
+      <select name="region">
+        <option value="">全部</option>
+        {% for region in regions %}<option value="{{ region }}" {% if filters.region == region %}selected{% endif %}>{{ region }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>项目类型</label>
+      <select name="project_type">
+        <option value="">全部</option>
+        {% for t in project_types %}<option value="{{ t }}" {% if filters.project_type == t %}selected{% endif %}>{{ t }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>价格类型</label>
+      <select name="item_type">
+        <option value="">全部</option>
+        {% for t in item_types %}<option value="{{ t }}" {% if filters.item_type == t %}selected{% endif %}>{{ t }}</option>{% endfor %}
+      </select>
+    </div>
+    <div><button class="button">分析</button></div>
+  </form>
+</section>
+
+<section class="grid analytics-grid">
+  <article class="card analytics-card"><p class="muted">可对比项目</p><p class="analytics-value">{{ project_rows|length }}</p></article>
+  <article class="card analytics-card"><p class="muted">趋势周期</p><p class="analytics-value">{{ trend_rows|length }}</p></article>
+  <article class="card analytics-card"><p class="muted">指标分组</p><p class="analytics-value">{{ indicator_rows|length }}</p></article>
+</section>
+
+<section class="card" style="padding: 24px; margin-top: 20px;">
+  <h2>类似项目单方对比</h2>
+  {% if project_rows %}
+  <table>
+    <tr><th>项目名称</th><th>地区</th><th>年份</th><th>类型</th><th>面积</th><th>价格数</th><th>总价合计</th><th>单方指标</th></tr>
+    {% for row in project_rows %}
+    <tr>
+      <td><a href="{{ url_for('project_detail_route', project_id=row.id, library=stats.library) }}">{{ row.name }}</a></td>
+      <td>{{ row.region }}</td>
+      <td>{{ row.year }}</td>
+      <td>{{ row.project_type }}</td>
+      <td>{{ row.building_area or '' }}</td>
+      <td>{{ row.price_count }}</td>
+      <td>{{ '%.2f'|format(row.total_cost or 0) }}</td>
+      <td>{{ '%.2f'|format(row.cost_per_area or 0) }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="muted">暂无可对比项目，请先导入带面积和价格的项目数据。</p>
+  {% endif %}
+</section>
+
+<section class="card" style="padding: 24px; margin-top: 20px;">
+  <h2>价格年度趋势</h2>
+  {% if trend_rows %}
+  <table>
+    <tr><th>周期</th><th>样本数</th><th>最低价</th><th>平均价</th><th>最高价</th><th>趋势条</th></tr>
+    {% set max_price = trend_rows|map(attribute='max_price')|max %}
+    {% for row in trend_rows %}
+    <tr>
+      <td>{{ row.period }}</td>
+      <td>{{ row.sample_count }}</td>
+      <td>{{ '%.2f'|format(row.min_price or 0) }}</td>
+      <td>{{ '%.2f'|format(row.avg_price or 0) }}</td>
+      <td>{{ '%.2f'|format(row.max_price or 0) }}</td>
+      <td><div class="mini-bar"><span style="width: {{ ((row.avg_price or 0) / (max_price or 1) * 100)|round(0) }}%;"></span></div></td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="muted">暂无趋势数据。可以先减少筛选条件再试。</p>
+  {% endif %}
+</section>
+
+<section class="card" style="padding: 24px; margin-top: 20px;">
+  <h2>项目类型指标</h2>
+  {% if indicator_rows %}
+  <table>
+    <tr><th>项目类型</th><th>项目数</th><th>价格样本</th><th>平均单价</th><th>平均单方指标</th></tr>
+    {% for row in indicator_rows %}
+    <tr>
+      <td>{{ row.project_type }}</td>
+      <td>{{ row.project_count }}</td>
+      <td>{{ row.price_count }}</td>
+      <td>{{ '%.2f'|format(row.avg_unit_price or 0) }}</td>
+      <td>{{ '%.2f'|format(row.avg_cost_per_area or 0) }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="muted">暂无项目类型指标。</p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card" style="padding: 28px;">
+  <div class="page-heading" style="margin-top:0;">
+    <div>
+      <h1>标准项维护</h1>
+      <p>维护可复用的清单、材料、人工、机械标准名称，为后续自动匹配和组价提供基础。</p>
+    </div>
+    <a class="button secondary" href="{{ url_for('rules_route', library=stats.library) }}">查看标准化规则</a>
+  </div>
+  <p class="muted">当前资料库：<code>{{ stats.library }}</code></p>
+</section>
+
+<section class="card" style="padding: 24px; margin-top: 20px;">
+  <h2>新增标准项</h2>
+  {% if errors %}
+  <ul>
+    {% for error in errors %}<li class="warn">{{ error }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+  <form method="post" action="/standard-items" class="grid" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+    <input type="hidden" name="library" value="{{ stats.library }}">
+    <div>
+      <label>类型</label>
+      <select name="item_type">
+        <option value="material">材料</option>
+        <option value="labor">人工</option>
+        <option value="machinery">机械</option>
+        <option value="equipment">设备</option>
+        <option value="other">其他</option>
+      </select>
+    </div>
+    <div><label>标准名称</label><input name="standard_name" placeholder="如 商品混凝土"></div>
+    <div><label>标准规格</label><input name="standard_spec" placeholder="如 C30"></div>
+    <div><label>单位</label><input name="standard_unit" placeholder="如 m3、t、工日"></div>
+    <div><label>分类</label><input name="category" placeholder="如 土建/安装/装饰"></div>
+    <div><label>关键词</label><input name="keywords" placeholder="用逗号分隔"></div>
+    <div><label>别名</label><input name="aliases" placeholder="历史名称或供应商叫法"></div>
+    <div><label>品牌要求</label><input name="brand_requirement" placeholder="可选"></div>
+    <div><label>备注</label><input name="notes" placeholder="适用范围或换算说明"></div>
+    <div><button class="button">保存标准项</button></div>
+  </form>
+</section>
+
+<section class="card" style="padding: 24px; margin-top: 20px;">
+  <h2>已维护标准项</h2>
+  {% if rows %}
+  <table>
+    <tr><th>类型</th><th>标准名称</th><th>规格</th><th>单位</th><th>分类</th><th>别名</th><th>更新时间</th></tr>
+    {% for row in rows %}
+    <tr>
+      <td>{{ row.item_type }}</td>
+      <td>{{ row.standard_name }}</td>
+      <td>{{ row.standard_spec or '' }}</td>
+      <td>{{ row.standard_unit }}</td>
+      <td>{{ row.category or '' }}</td>
+      <td>{{ row.aliases or '' }}</td>
+      <td>{{ row.updated_at }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="muted">尚未维护标准项。可以先从下方高频历史价格项中挑选录入。</p>
+  {% endif %}
+</section>
+
+<section class="card" style="padding: 24px; margin-top: 20px;">
+  <h2>历史价格高频候选</h2>
+  {% if inferred_rows %}
+  <table>
+    <tr><th>类型</th><th>名称</th><th>规格</th><th>单位</th><th>来源数</th><th>平均价</th></tr>
+    {% for row in inferred_rows %}
+    <tr>
+      <td>{{ row.item_type }}</td>
+      <td>{{ row.standard_name }}</td>
+      <td>{{ row.standard_spec }}</td>
+      <td>{{ row.standard_unit }}</td>
+      <td>{{ row.source_count }}</td>
+      <td>{{ '%.2f'|format(row.avg_price or 0) }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="muted">暂无可沉淀的历史候选项。</p>
+  {% endif %}
+</section>
+{% endblock %}

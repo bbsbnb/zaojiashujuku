@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  <h2>补价任务库</h2>
+  <p>当前资料库：<code>{{ stats.library }}</code></p>
+  <p>当前显示 {{ rows|length }} 个任务。</p>
+  <div class="nav">
+    <a class="button {% if status_filter %}secondary{% endif %}" href="/tasks?library={{ stats.library }}">全部任务</a>
+    <a class="button {% if status_filter != 'pending' %}secondary{% endif %}" href="/tasks?library={{ stats.library }}&status=pending">仅看待确认</a>
+    <a class="button {% if status_filter != 'confirmed' %}secondary{% endif %}" href="/tasks?library={{ stats.library }}&status=confirmed">仅看已确认</a>
+    <a class="button secondary" href="{{ back }}">返回首页</a>
+  </div>
+</section>
+
+<section class="card" style="margin-top:18px;">
+  <table>
+    <tr>
+      <th>项目名称</th><th>地区</th><th>类型</th><th>工期</th><th>状态</th><th>条目</th><th>待确认</th><th>已确认</th><th>候选</th><th>创建时间</th><th>操作</th>
+    </tr>
+    {% for row in rows %}
+    <tr>
+      <td>{{ row.project_name }}</td>
+      <td>{{ row.region }}</td>
+      <td>{{ row.project_type }}</td>
+      <td>{{ row.duration }}</td>
+      <td>{{ row.status }}</td>
+      <td>{{ row.item_count }}</td>
+      <td>{{ row.pending_count }}</td>
+      <td>{{ row.confirmed_count }}</td>
+      <td>{{ row.candidate_count }}</td>
+      <td>{{ row.created_at }}</td>
+      <td><a href="/tasks/{{ row.id }}?library={{ stats.library }}">查看明细</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+</section>
+{% endblock %}

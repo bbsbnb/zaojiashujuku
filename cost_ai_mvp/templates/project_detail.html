@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  {% if project %}
+    <h2>项目详情：{{ project.name }}</h2>
+    <p>
+      地区：{{ project.region }} · 年份：{{ project.year }} · 类型：{{ project.project_type }} ·
+      阶段：{{ project.cost_stage }} · 价格口径：{{ project.price_scope }}
+    </p>
+    <p>归档文件夹：<code>{{ project.archive_folder_path }}</code></p>
+    <div class="nav">
+      <a class="button secondary" href="/prices?library={{ stats.library }}&q={{ project.name }}">查看该项目价格</a>
+      <a class="button secondary" href="{{ back }}">返回列表</a>
+    </div>
+  {% else %}
+    <h2>项目未找到</h2>
+    <a class="button secondary" href="{{ back }}">返回列表</a>
+  {% endif %}
+</section>
+
+<div class="grid" style="margin-top:18px;">
+  <section class="card">
+    <h3>归档文件：{{ files|length }} 个</h3>
+    <table>
+      <tr><th>文件名</th><th>类型</th><th>状态</th><th>价格数</th></tr>
+      {% for f in files %}
+      <tr>
+        <td title="{{ f.archive_path }}">{{ f.original_name }}</td>
+        <td>{{ f.file_type }}</td>
+        <td>{{ f.import_status }}</td>
+        <td>{{ f.parsed_rows }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </section>
+
+  <section class="card">
+    <h3>该项目价格（前 200 条）</h3>
+    <table>
+      <tr><th>类型</th><th>名称</th><th>规格</th><th>单位</th><th>单价</th><th>来源</th></tr>
+      {% for p in prices %}
+      <tr>
+        <td>{{ p.item_type }}</td>
+        <td>{{ p.standard_name or p.original_name }}</td>
+        <td>{{ p.standard_spec or p.original_spec }}</td>
+        <td>{{ p.standard_unit or p.original_unit }}</td>
+        <td>{{ p.unit_price }}</td>
+        <td>{{ p.source_type }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </section>
+</div>
+{% endblock %}

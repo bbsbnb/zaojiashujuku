@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .rule-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .rule-stat { min-height: 138px; padding: 24px; display: grid; grid-template-columns: 54px 1fr; gap: 14px; align-items: center; }
+  .rule-icon { width: 54px; height: 54px; border-radius: 12px; display: grid; place-items: center; font-weight: 900; }
+  .rule-icon.green { background: var(--green-soft); color: #00957f; }
+  .rule-icon.blue { background: var(--blue-soft); color: #1b6ce0; }
+  .rule-icon.purple { background: var(--purple-soft); color: #8b4de3; }
+  .rule-icon.orange { background: var(--orange-soft); color: #d96b00; }
+  .rule-label { margin: 0; color: #3f4852; font-weight: 800; }
+  .rule-value { margin: 8px 0; font-size: 30px; line-height: 1; font-weight: 900; }
+  .rule-help { margin: 0; color: var(--muted); font-size: 13px; font-weight: 700; }
+</style>
+<section class="card" style="padding: 28px;">
+  <div class="page-heading" style="margin-top:0;">
+    <div>
+      <h1>标准化规则</h1>
+      <p>查看系统从历史价格中沉淀出的标准名称、规格、单位和匹配依据。</p>
+    </div>
+    <span>
+      <a class="button secondary" href="{{ url_for('prices_route', library=stats.library) }}">进入价格库</a>
+      <a class="button secondary" href="{{ url_for('standard_items_route', library=stats.library) }}">维护标准项</a>
+    </span>
+  </div>
+  <p class="muted">当前资料库：<code>{{ stats.library }}</code></p>
+</section>
+
+<section class="grid rule-stats" style="margin-top: 20px;">
+  <article class="card rule-stat"><span class="rule-icon green">规</span><span><p class="rule-label">标准项</p><p class="rule-value">{{ summary.active_items }}</p><p class="rule-help">人工维护的标准项</p></span></article>
+  <article class="card rule-stat"><span class="rule-icon blue">别</span><span><p class="rule-label">别名项</p><p class="rule-value">{{ summary.alias_items }}</p><p class="rule-help">含别名的标准项</p></span></article>
+  <article class="card rule-stat"><span class="rule-icon purple">史</span><span><p class="rule-label">历史规则</p><p class="rule-value">{{ summary.history_rules }}</p><p class="rule-help">已记录匹配历史</p></span></article>
+  <article class="card rule-stat"><span class="rule-icon orange">价</span><span><p class="rule-label">价格名称</p><p class="rule-value">{{ summary.price_names }}</p><p class="rule-help">由价格库聚合</p></span></article>
+</section>
+
+<section class="card" style="padding: 24px; margin-top: 20px;">
+  <h2>规则预览</h2>
+  {% if rows %}
+  <table>
+    <tr><th>类型</th><th>标准名称</th><th>规格</th><th>单位</th><th>来源数</th><th>价格区间</th><th>地区</th></tr>
+    {% for row in rows %}
+    <tr>
+      <td>{{ row.item_type }}</td>
+      <td>{{ row.standard_name }}</td>
+      <td>{{ row.standard_spec }}</td>
+      <td>{{ row.standard_unit }}</td>
+      <td>{{ row.source_count }}</td>
+      <td>{{ '%.2f'|format(row.min_price or 0) }} / {{ '%.2f'|format(row.avg_price or 0) }} / {{ '%.2f'|format(row.max_price or 0) }}</td>
+      <td>{{ row.regions }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="muted">价格库暂无可聚合的标准化规则。请先导入项目或样本。</p>
+  {% endif %}
+</section>
+{% endblock %}

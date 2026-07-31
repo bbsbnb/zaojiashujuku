@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  <h2>补价完成</h2>
+  <p class="ok">{{ result.summary }}</p>
+  {% if result.errors %}
+    <h3>解析提示</h3>
+    <ul>{% for e in result.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+  {% endif %}
+  <p>输出文件：<code>{{ result.output }}</code></p>
+  <a class="button" href="/download?path={{ result.output }}">下载 Excel</a>
+  <a class="button secondary" href="/open-folder?path={{ result.output }}">打开所在文件夹</a>
+  {% if task_url %}
+  <a class="button secondary" href="{{ task_url }}">查看补价明细</a>
+  {% endif %}
+  <a class="button secondary" href="{{ back }}">返回首页</a>
+</section>
+{% endblock %}

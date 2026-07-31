@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  {% if summary %}
+    <h2>补价任务：{{ summary.task.project_name }}</h2>
+    <p>
+      地区：{{ summary.task.region }} · 类型：{{ summary.task.project_type }} · 工期：{{ summary.task.duration }} ·
+      价格口径：{{ summary.task.price_scope }}
+    </p>
+    <p>输入文件：<code>{{ summary.task.input_file_path }}</code></p>
+    <div class="nav">
+      <a class="button secondary" href="/tasks?library={{ stats.library }}">返回任务库</a>
+      <a class="button secondary" href="{{ back }}">返回首页</a>
+    </div>
+  {% else %}
+    <h2>任务未找到</h2>
+    <a class="button secondary" href="{{ back }}">返回任务库</a>
+  {% endif %}
+</section>
+
+{% if summary %}
+  {% for section_name, section_label in [('labor', '人工'), ('material', '材料'), ('machinery', '机械'), ('other', '其他')] %}
+  <section class="card" style="margin-top:18px;">
+    <h3>{{ section_label }}</h3>
+    {% set section_items = summary.grouped_items.get(section_name, []) %}
+    {% if section_items %}
+    <table>
+      <tr>
+        <th>行号</th><th>名称</th><th>规格</th><th>单位</th><th>建议价</th><th>区间</th><th>置信度</th><th>风险</th><th>状态</th><th>候选</th>
+      </tr>
+      {% for item in section_items %}
+      <tr>
+        <td>{{ item.source_row }}</td>
+        <td>{{ item.original_name }}</td>
+        <td>{{ item.original_spec }}</td>
+        <td>{{ item.original_unit }}</td>
+        <td>{{ item.suggested_price }}</td>
+        <td>{{ item.reference_low }} ~ {{ item.reference_high }}</td>
+        <td>{{ item.confidence }}</td>
+        <td>{{ item.risk_text }}</td>
+        <td>{{ '已确认' if item.is_accepted else '待确认' }}</td>
+        <td>{{ item.candidate_count }}</td>
+      </tr>
+      <tr>
+        <td colspan="10">
+          <strong>AI 解释：</strong>{{ item.ai_explanation }}
+          {% if summary.candidates_by_item[item.id] %}
+          <div style="margin-top:10px;">
+            <table>
+              <tr><th>候选</th><th>价格</th><th>区间</th><th>来源</th><th>理由</th><th>风险</th><th>选中</th><th>确认</th></tr>
+              {% for c in summary.candidates_by_item[item.id] %}
+              <tr>
+                <td>{{ c.rank_no }}</td>
+                <td>{{ c.candidate_price }}</td>
+                <td>{{ c.reference_low }} ~ {{ c.reference_high }}</td>
+                <td>{{ c.source_type }} / {{ c.source_region }}</td>
+                <td>{{ c.match_reason }}</td>
+                <td>{{ c.risk_text }}</td>
+                <td>{{ '是' if c.is_selected else '' }}</td>
+                <td>
+                  <form method="post" action="/tasks/{{ summary.task.id }}/select-candidate?library={{ stats.library }}">
+                    <input type="hidden" name="task_item_id" value="{{ item.id }}">
+                    <input type="hidden" name="candidate_id" value="{{ c.id }}">
+                    <button type="submit">确认</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </table>
+          </div>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}
+      <p class="muted">暂无 {{ section_label }} 条目。</p>
+    {% endif %}
+  </section>
+  {% endfor %}
+{% endif %}
+{% endblock %}

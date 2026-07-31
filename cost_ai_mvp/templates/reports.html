@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card" style="padding: 28px;">
+  <div class="page-heading" style="margin-top:0;">
+    <div>
+      <h1>正式报表导出</h1>
+      <p>汇总价格库、项目指标、材料行情和调价政策，生成可交付的综合 Excel 报表。</p>
+    </div>
+    <a class="button secondary" href="{{ back }}">返回首页</a>
+  </div>
+  <p class="muted">当前资料库：<code>{{ stats.library }}</code></p>
+</section>
+
+<section class="grid" style="grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 20px;">
+  <article class="card" style="padding: 24px;">
+    <h2>综合报表</h2>
+    <p class="muted">包含报表摘要、价格库、项目指标、材料行情、调价政策。</p>
+    <a class="button" href="{{ url_for('export_report_route', library=stats.library, type='summary') }}">导出综合报表</a>
+  </article>
+  <article class="card" style="padding: 24px;">
+    <h2>价格清单</h2>
+    <p class="muted">导出 P0 阶段价格库清单，适合二次筛选和审核。</p>
+    <a class="button secondary" href="{{ url_for('export_prices_route', library=stats.library) }}">导出价格清单</a>
+  </article>
+  <article class="card" style="padding: 24px;">
+    <h2>质量报告</h2>
+    <p class="muted">导出完整性校验结果和需处理问题明细。</p>
+    <a class="button secondary" href="{{ url_for('export_quality_route', library=stats.library) }}">导出质量报告</a>
+  </article>
+</section>
+
+<section class="card" style="padding: 24px; margin-top: 20px;">
+  <h2>报表口径</h2>
+  <table>
+    <tr><th>模块</th><th>数据来源</th><th>用途</th></tr>
+    <tr><td>价格库</td><td>已导入价格记录，排除异常项</td><td>形成审价、询价和组价基础</td></tr>
+    <tr><td>项目指标</td><td>项目表与价格表聚合</td><td>横向对比总价和单方指标</td></tr>
+    <tr><td>材料行情</td><td>人工维护的市场价</td><td>观察市场价与历史均价偏差</td></tr>
+    <tr><td>调价政策</td><td>地区系数和政策调价规则</td><td>预览地区/人工/材料/机械调价影响</td></tr>
+  </table>
+</section>
+{% endblock %}

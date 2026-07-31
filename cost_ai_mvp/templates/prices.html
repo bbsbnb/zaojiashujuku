@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  <h2>价格库</h2>
+  <p>当前资料库：<code>{{ stats.library }}</code></p>
+  <form method="get" action="/prices" class="grid">
+    <input type="hidden" name="library" value="{{ stats.library }}">
+    <div>
+      <label>名称/规格关键词</label>
+      <input name="q" value="{{ filters.q }}" placeholder="如 C30、普工、汽车吊">
+    </div>
+    <div>
+      <label>类型</label>
+      <select name="item_type">
+        <option value="">全部</option>
+        <option value="labor" {% if filters.item_type == 'labor' %}selected{% endif %}>人工</option>
+        <option value="material" {% if filters.item_type == 'material' %}selected{% endif %}>材料</option>
+        <option value="machinery" {% if filters.item_type == 'machinery' %}selected{% endif %}>机械</option>
+        <option value="equipment" {% if filters.item_type == 'equipment' %}selected{% endif %}>设备</option>
+      </select>
+    </div>
+    <div>
+      <label>地区</label>
+      <select name="region">
+        <option value="">全部</option>
+        {% for region in regions %}<option value="{{ region }}" {% if filters.region == region %}selected{% endif %}>{{ region }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>来源类型</label>
+      <select name="source_type">
+        <option value="">全部</option>
+        {% for source in source_types %}<option value="{{ source }}" {% if filters.source_type == source %}selected{% endif %}>{{ source }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>最多显示</label>
+      <input name="limit" value="{{ filters.limit }}">
+    </div>
+    <div><button>筛选</button></div>
+  </form>
+</section>
+
+<section class="card" style="margin-top:18px; padding:18px;">
+  <h3>数据完整性校验</h3>
+  <p class="muted">用于导入后快速发现必填项缺失、无效单价、重复价格和已标记异常。</p>
+  <a class="button secondary" href="{{ url_for('export_quality_route', library=stats.library) }}">导出质量报告</a>
+  <table>
+    <tr><th>校验项</th><th>数量</th><th>处理建议</th></tr>
+    <tr><td>必填项缺失</td><td>{{ quality.missing_required }}</td><td>补齐名称、单位、地区、类型后再用于正式组价</td></tr>
+    <tr><td>无效单价</td><td>{{ quality.invalid_price }}</td><td>检查单价为空、0 或负数的记录</td></tr>
+    <tr><td>疑似重复记录</td><td>{{ quality.duplicate_items }}</td><td>核对同名称、规格、单位、地区、单价的重复来源</td></tr>
+    <tr><td>已标记异常</td><td>{{ quality.outliers }}</td><td>复核异常原因，确认后再发布使用</td></tr>
+  </table>
+</section>
+
+<section class="card" style="margin-top:18px;">
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:0 0 4px;">
+    <h3>价格记录：{{ rows|length }} 条</h3>
+    <a class="button secondary" href="{{ url_for('export_prices_route', library=stats.library, q=filters.q, item_type=filters.item_type, region=filters.region, source_type=filters.source_type) }}">导出当前筛选</a>
+  </div>
+  <table>
+    <tr>
+      <th>类型</th><th>名称</th><th>规格</th><th>单位</th><th>单价</th><th>地区</th><th>年份/日期</th><th>来源</th><th>口径</th><th>来源文件</th><th>Sheet/行号</th>
+    </tr>
+    {% for row in rows %}
+    <tr>
+      <td>{{ row.item_type }}</td>
+      <td>{{ row.standard_name or row.original_name }}</td>
+      <td>{{ row.standard_spec or row.original_spec }}</td>
+      <td>{{ row.standard_unit or row.original_unit }}</td>
+      <td>{{ row.unit_price }}</td>
+      <td>{{ row.region }}</td>
+      <td>{{ row.price_date or row.price_year }}</td>
+      <td>{{ row.source_type }}</td>
+      <td>{{ row.price_scope or '' }}</td>
+      <td title="{{ row.archive_path }}">{{ row.file_name }}</td>
+      <td>{{ row.source_sheet }} / {{ row.source_row }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <a class="button secondary" href="{{ back }}">返回首页</a>
+</section>
+{% endblock %}

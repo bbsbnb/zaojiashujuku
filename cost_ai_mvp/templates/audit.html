@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card" style="padding: 28px;">
+  <div class="page-heading" style="margin-top:0;">
+    <div>
+      <h1>操作审计日志</h1>
+      <p>记录标准项、材料行情、调价规则和智能推荐等关键动作，便于追溯数据使用过程。</p>
+    </div>
+    <a class="button secondary" href="{{ back }}">返回首页</a>
+  </div>
+  <p class="muted">当前资料库：<code>{{ stats.library }}</code></p>
+</section>
+
+<section class="card" style="padding: 24px; margin-top: 20px;">
+  <h2>最近操作</h2>
+  {% if rows %}
+  <table>
+    <tr><th>时间</th><th>动作</th><th>对象类型</th><th>对象</th><th>摘要</th><th>用户</th></tr>
+    {% for row in rows %}
+    <tr><td>{{ row.created_at }}</td><td>{{ row.action }}</td><td>{{ row.entity_type }}</td><td>{{ row.entity_id or '' }}</td><td>{{ row.summary }}</td><td>{{ row.user_name }}</td></tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="muted">暂无审计记录。</p>
+  {% endif %}
+</section>
+{% endblock %}

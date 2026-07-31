@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card" style="padding: 28px;">
+  <div class="page-heading" style="margin-top:0;">
+    <div>
+      <h1>材料价格行情</h1>
+      <p>维护人工录入或外部采集的市场价，并与历史价格库均价进行对比。</p>
+    </div>
+    <a class="button secondary" href="{{ back }}">返回首页</a>
+  </div>
+  <p class="muted">当前资料库：<code>{{ stats.library }}</code></p>
+</section>
+
+<section class="card" style="padding: 24px; margin-top: 20px;">
+  <h2>新增行情</h2>
+  {% if errors %}<ul>{% for error in errors %}<li class="warn">{{ error }}</li>{% endfor %}</ul>{% endif %}
+  <form method="post" action="/market" class="grid" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
+    <input type="hidden" name="library" value="{{ stats.library }}">
+    <div><label>材料名称</label><input name="item_name" placeholder="如 商品混凝土"></div>
+    <div><label>规格</label><input name="spec" placeholder="如 C30"></div>
+    <div><label>单位</label><input name="unit" placeholder="如 m3、t"></div>
+    <div><label>地区</label><input name="region" value="深圳"></div>
+    <div><label>行情日期</label><input name="market_date" value="{{ now or '' }}" placeholder="YYYY-MM-DD"></div>
+    <div><label>市场价</label><input name="market_price" placeholder="数字"></div>
+    <div><label>来源</label><input name="source_name" placeholder="信息价/供应商/人工录入"></div>
+    <div><label>备注</label><input name="notes" placeholder="税率、运距、付款条件等"></div>
+    <div><button class="button">保存行情</button></div>
+  </form>
+</section>
+
+<section class="card" style="padding: 24px; margin-top: 20px;">
+  <h2>行情与历史均价对比</h2>
+  {% if compare_rows %}
+  <table>
+    <tr><th>材料</th><th>规格</th><th>单位</th><th>地区</th><th>日期</th><th>市场价</th><th>历史均价</th><th>历史样本</th><th>偏差</th></tr>
+    {% for row in compare_rows %}
+    <tr>
+      <td>{{ row.item_name }}</td><td>{{ row.spec or '' }}</td><td>{{ row.unit }}</td><td>{{ row.region }}</td><td>{{ row.market_date }}</td>
+      <td>{{ '%.2f'|format(row.market_price or 0) }}</td><td>{{ '%.2f'|format(row.history_avg_price or 0) }}</td><td>{{ row.history_count }}</td>
+      <td class="{{ 'warn' if (row.diff_percent or 0)|abs > 15 else 'ok' }}">{{ '%.2f'|format(row.diff_percent or 0) }}%</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="muted">暂无行情记录。</p>
+  {% endif %}
+</section>
+
+<section class="card" style="padding: 24px; margin-top: 20px;">
+  <h2>行情记录</h2>
+  {% if rows %}
+  <table>
+    <tr><th>材料</th><th>规格</th><th>单位</th><th>地区</th><th>日期</th><th>市场价</th><th>来源</th><th>备注</th></tr>
+    {% for row in rows %}
+    <tr><td>{{ row.item_name }}</td><td>{{ row.spec or '' }}</td><td>{{ row.unit }}</td><td>{{ row.region }}</td><td>{{ row.market_date }}</td><td>{{ row.market_price }}</td><td>{{ row.source_name or '' }}</td><td>{{ row.notes or '' }}</td></tr>
+    {% endfor %}
+  </table>
+  {% else %}<p class="muted">暂无行情记录。</p>{% endif %}
+</section>
+{% endblock %}

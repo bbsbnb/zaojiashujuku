@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card" style="padding: 28px;">
+  <div class="page-heading" style="margin-top:0;">
+    <div>
+      <h1>只读 API</h1>
+      <p>为后续手机端、插件或其他工具提供只读数据接口。当前不开放写入接口。</p>
+    </div>
+    <a class="button secondary" href="{{ back }}">返回首页</a>
+  </div>
+  <p class="muted">当前资料库：<code>{{ stats.library }}</code></p>
+</section>
+
+<section class="card" style="padding: 24px; margin-top: 20px;">
+  <h2>接口列表</h2>
+  <table>
+    <tr><th>接口</th><th>参数</th><th>说明</th><th>示例</th></tr>
+    <tr><td>/api/stats</td><td>library</td><td>资料库统计</td><td><code>/api/stats?library={{ stats.library }}</code></td></tr>
+    <tr><td>/api/prices</td><td>library, q, region, item_type, source_type, limit</td><td>价格库只读查询</td><td><code>/api/prices?library={{ stats.library }}&q=C30&limit=20</code></td></tr>
+    <tr><td>/api/recommend</td><td>library, q, region, item_type</td><td>轻量智能组价推荐</td><td><code>/api/recommend?library={{ stats.library }}&q=C30</code></td></tr>
+  </table>
+</section>
+{% endblock %}

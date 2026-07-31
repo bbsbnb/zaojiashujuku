@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  <h2>查询结果：{{ result.query }}</h2>
+  <div class="grid">
+    <div class="card" style="background:#f0f7ff; border: 2px solid #2463df;">
+      <h3>建议价</h3>
+      <div style="font-size:34px; font-weight:700; margin: 8px 0;">{{ result.suggestion.suggested_price or '暂无' }}</div>
+      <p>参考区间：{{ result.suggestion.reference_low or '—' }} ~ {{ result.suggestion.reference_high or '—' }}</p>
+      <p>置信度：{{ result.suggestion.confidence }}</p>
+      <div class="nav">
+        <button type="button" onclick="copyText('{{ result.suggestion.suggested_price or '' }}', this)">复制建议价</button>
+        <button type="button" class="secondary" onclick="copyText('{{ result.suggestion.reference_low or '' }} ~ {{ result.suggestion.reference_high or '' }}', this)">复制区间</button>
+      </div>
+    </div>
+    <div class="card" style="background:#f8fbff;">
+      <h3>风险提示</h3>
+      <p>{{ result.suggestion.risk_text }}</p>
+      <p class="muted">{{ result.explanation }}</p>
+    </div>
+  </div>
+  <div class="nav">
+    <a class="button" href="/prices?library={{ stats.library }}&q={{ result.query }}">在价格库中继续查</a>
+    <a class="button secondary" href="{{ back }}">返回首页</a>
+  </div>
+</section>
+
+{% for key, label in [('labor', '人工'), ('material', '材料'), ('machinery', '机械'), ('equipment', '设备'), ('other', '其他')] %}
+<section class="card" style="margin-top:18px;">
+  <h3>{{ label }}</h3>
+  {% if grouped_rows[key] %}
+  <table>
+    <tr><th>名称</th><th>规格</th><th>单位</th><th>单价</th><th>地区</th><th>年份</th><th>来源</th><th>匹配分</th></tr>
+    {% for row in grouped_rows[key] %}
+    <tr>
+      <td>{{ row['名称'] }}</td>
+      <td>{{ row['规格'] }}</td>
+      <td>{{ row['单位'] }}</td>
+      <td>{{ row['单价'] }}</td>
+      <td>{{ row['地区'] }}</td>
+      <td>{{ row['年份'] }}</td>
+      <td>{{ row['来源'] }}</td>
+      <td>{{ row['匹配分'] }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+    <p class="muted">暂无 {{ label }} 参考数据。</p>
+  {% endif %}
+</section>
+{% endfor %}
+<script>
+async function copyText(text, button) {
+  try {
+    await navigator.clipboard.writeText(text);
+    const old = button.textContent;
+    button.textContent = '已复制';
+    setTimeout(() => button.textContent = old, 1200);
+  } catch (e) {
+    alert('复制失败');
+  }
+}
+</script>
+{% endblock %}

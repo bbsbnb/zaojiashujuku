@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  <h2>项目库</h2>
+  <p>当前资料库：<code>{{ stats.library }}</code></p>
+  <form method="get" action="/projects" class="grid">
+    <input type="hidden" name="library" value="{{ stats.library }}">
+    <div>
+      <label>项目关键词</label>
+      <input name="q" value="{{ filters.q }}" placeholder="项目名称/简称">
+    </div>
+    <div>
+      <label>地区</label>
+      <select name="region">
+        <option value="">全部</option>
+        {% for region in regions %}<option value="{{ region }}" {% if filters.region == region %}selected{% endif %}>{{ region }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>年份</label>
+      <select name="year">
+        <option value="">全部</option>
+        {% for year in years %}<option value="{{ year }}" {% if filters.year|string == year|string %}selected{% endif %}>{{ year }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>项目类型</label>
+      <select name="project_type">
+        <option value="">全部</option>
+        {% for t in project_types %}<option value="{{ t }}" {% if filters.project_type == t %}selected{% endif %}>{{ t }}</option>{% endfor %}
+      </select>
+    </div>
+    <div><button>筛选</button></div>
+  </form>
+</section>
+
+<section class="card" style="margin-top:18px;">
+  <h3>项目列表：{{ rows|length }} 个</h3>
+  <table>
+    <tr>
+      <th>项目名称</th><th>地区</th><th>年份</th><th>类型</th><th>面积</th><th>阶段</th><th>文件数</th><th>价格数</th><th>最近导入</th><th>操作</th>
+    </tr>
+    {% for row in rows %}
+    <tr>
+      <td>{{ row.name }}</td>
+      <td>{{ row.region }}</td>
+      <td>{{ row.year }}</td>
+      <td>{{ row.project_type }}</td>
+      <td>{{ row.building_area or '' }}</td>
+      <td>{{ row.cost_stage }}</td>
+      <td>{{ row.file_count }}</td>
+      <td>{{ row.price_count }}</td>
+      <td>{{ row.latest_imported_at or '' }}</td>
+      <td><a href="/projects/{{ row.id }}?library={{ stats.library }}">查看详情</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+  <a class="button secondary" href="{{ back }}">返回首页</a>
+</section>
+{% endblock %}

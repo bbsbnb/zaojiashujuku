@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card" style="padding: 28px;">
+  <div class="page-heading" style="margin-top:0;">
+    <div>
+      <h1>清单匹配</h1>
+      <p>上传新项目人材机表，生成候选价格并进入人工确认。</p>
+    </div>
+    <a class="button secondary" href="{{ url_for('tasks_route', library=stats.library) }}">查看任务库</a>
+  </div>
+  <p class="muted">当前资料库：<code>{{ stats.library }}</code></p>
+</section>
+
+<section class="grid" style="grid-template-columns: 360px 1fr; margin-top: 20px;">
+  <article class="card" style="padding: 24px;">
+    <h2>上传清单</h2>
+    <form method="post" action="/price-file" enctype="multipart/form-data">
+      <input type="hidden" name="library" value="{{ stats.library }}">
+      <label>Excel 文件</label>
+      <input type="file" name="file" accept=".xlsx,.xls,.xlsm">
+      <label>项目名称</label>
+      <input name="project_name" value="深圳新项目">
+      <label>地区</label>
+      <input name="region" value="深圳">
+      <label>项目类型</label>
+      <input name="project_type" value="住宅">
+      <label>价格口径</label>
+      <input name="price_scope" value="含税">
+      <label>付款方式</label>
+      <input name="payment_terms" value="">
+      <label>工期</label>
+      <input name="duration" value="18个月，工期偏紧">
+      <button class="button" style="width:100%; margin-top:16px;">开始匹配</button>
+    </form>
+  </article>
+
+  <article class="card" style="padding: 24px;">
+    <h2>最近匹配任务</h2>
+    {% if rows %}
+    <table>
+      <tr><th>项目名称</th><th>地区</th><th>条目</th><th>待确认</th><th>候选</th><th>状态</th><th>操作</th></tr>
+      {% for row in rows[:8] %}
+      <tr>
+        <td>{{ row.project_name }}</td>
+        <td>{{ row.region }}</td>
+        <td>{{ row.item_count }}</td>
+        <td>{{ row.pending_count }}</td>
+        <td>{{ row.candidate_count }}</td>
+        <td>{{ row.status }}</td>
+        <td><a href="{{ url_for('task_detail_route', task_id=row.id, library=stats.library) }}">查看明细</a></td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}
+    <p class="muted">还没有清单匹配任务。</p>
+    {% endif %}
+  </article>
+</section>
+{% endblock %}

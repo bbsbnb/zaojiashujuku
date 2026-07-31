@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  <h2>导入结果</h2>
+  <p class="ok">{{ result.summary }}</p>
+  <p>当前价格记录：{{ stats.prices }} 条</p>
+  <table>
+    <tr><th>日志</th></tr>
+    {% for line in result.log %}<tr><td>{{ line }}</td></tr>{% endfor %}
+  </table>
+  <a class="button" href="/prices?library={{ stats.library }}">查看价格库</a>
+  <a class="button secondary" href="{{ back }}">返回首页</a>
+</section>
+{% endblock %}

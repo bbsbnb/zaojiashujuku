@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .overview-stats { margin-top: 36px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .stat-card { min-height: 168px; padding: 30px 16px; display: grid; grid-template-columns: 58px 1fr; gap: 16px; align-items: start; }
+  .stat-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+  }
+  .stat-icon.green { background: var(--green-soft); color: #00a98d; }
+  .stat-icon.blue { background: var(--blue-soft); color: #1b6ce0; }
+  .stat-icon.purple { background: var(--purple-soft); color: #9b55e9; }
+  .stat-icon.orange { background: var(--orange-soft); color: #e38100; }
+  .stat-label { margin: 0; color: #3f4852; font-size: 14px; font-weight: 800; }
+  .stat-value { margin: 12px 0 22px; font-size: 32px; line-height: 1; font-weight: 900; }
+  .stat-value.orange { color: #d96b00; }
+  .stat-help { margin: 0; color: var(--muted); font-size: 13px; font-weight: 700; }
+  .empty-panel {
+    min-height: 394px;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: 42px 24px;
+  }
+  .empty-graphic { width: 136px; height: 112px; margin: 0 auto 22px; opacity: .52; }
+  .empty-panel h3 { margin: 0 0 12px; font-size: 22px; }
+  .empty-panel p { margin: 0 0 26px; color: var(--muted); font-size: 16px; font-weight: 700; }
+  .recent-list { padding: 26px; }
+  .recent-row { display: grid; grid-template-columns: 1fr auto; gap: 18px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .recent-row:last-child { border-bottom: 0; }
+  .recent-row strong { display: block; margin-bottom: 8px; color: #202a33; }
+  .recent-row span { color: var(--muted); font-size: 13px; }
+  .tool-strip { margin-top: 32px; min-height: 104px; display: grid; grid-template-columns: repeat(4, 1fr); align-items: center; }
+  .tool-item { min-height: 68px; padding: 0 28px; display: flex; align-items: center; gap: 16px; border-right: 1px solid var(--line); }
+  .tool-item:last-child { border-right: 0; }
+  .tool-icon { width: 52px; height: 52px; border-radius: 12px; display: grid; place-items: center; flex: 0 0 auto; }
+  .tool-item strong { display: block; margin-bottom: 7px; color: #26313a; }
+  .tool-item span { color: var(--muted); font-size: 13px; font-weight: 700; }
+  .action-drawer {
+    margin-top: 32px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .action-card { padding: 22px; }
+  .action-card h3 { margin: 0 0 8px; font-size: 18px; }
+  .action-card p { min-height: 42px; margin: 0 0 14px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+  .compact-form { display: grid; grid-template-columns: 1fr; }
+  .compact-form .button { width: 100%; margin-top: 16px; }
+  @media (max-width: 900px) {
+    .overview-stats, .tool-strip, .action-drawer { grid-template-columns: 1fr; }
+    .tool-item { border-right: 0; border-bottom: 1px solid var(--line); }
+    .tool-item:last-child { border-bottom: 0; }
+  }
+</style>
+
+<div class="page-top">
+  <div class="breadcrumb">工程造价数据库 <span aria-hidden="true">›</span> <strong>总览</strong></div>
+  <div class="preview-badge" title="当前系统仍在人工审核技术预览阶段">
+    <span aria-hidden="true">☆</span> 人工审核技术预览
+  </div>
+</div>
+
+<div class="page-heading">
+  <div>
+    <h1>数据工作总览</h1>
+    <p>先处理异常，再使用已发布数据进行检索与比较。</p>
+  </div>
+  <a class="button" href="#import-project" title="导入项目">
+    <span aria-hidden="true">＋</span> 导入项目
+  </a>
+</div>
+
+<section class="grid overview-stats" aria-label="数据统计">
+  <article class="card stat-card">
+    <span class="stat-icon green" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 12 9 5 9-5"/><path d="m3 16 9 5 9-5"/></svg></span>
+    <span><p class="stat-label">项目</p><p class="stat-value">{{ stats.projects }}</p><p class="stat-help">已导入项目总数</p></span>
+  </article>
+  <article class="card stat-card">
+    <span class="stat-icon blue" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 8h8"/><path d="M9 12h6"/><path d="M12 8v10"/></svg></span>
+    <span><p class="stat-label">已发布版本</p><p class="stat-value">{{ stats.files }}</p><p class="stat-help">已发布数据版本</p></span>
+  </article>
+  <article class="card stat-card">
+    <span class="stat-icon purple" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6l1 2h3v15H5V6h3z"/><path d="m9 13 2 2 4-5"/></svg></span>
+    <span><p class="stat-label">可检索清单项</p><p class="stat-value">{{ stats.prices }}</p><p class="stat-help">可检索的清单数据</p></span>
+  </article>
+  <article class="card stat-card">
+    <span class="stat-icon orange" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="M12 8v5"/><path d="M12 17h.01"/></svg></span>
+    <span><p class="stat-label">待处理异常</p><p class="stat-value orange">{{ stats.tasks }}</p><p class="stat-help">需要处理的异常数据</p></span>
+  </article>
+</section>
+
+<section class="section-title">
+  <div>
+    <h2>最近项目</h2>
+    <p>发布后才进入正式检索库</p>
+  </div>
+  <a class="button secondary" href="/projects?library={{ stats.library }}">查看全部 ›</a>
+</section>
+
+{% if recent_tasks %}
+<section class="card recent-list" aria-label="最近任务">
+  {% for row in recent_tasks %}
+  <a class="recent-row" href="/tasks/{{ row.id }}?library={{ stats.library }}">
+    <span><strong>{{ row.project_name }}</strong><span>{{ row.region }} · {{ row.project_type }} · {{ row.created_at }}</span></span>
+    <span class="muted">{{ row.status }} ›</span>
+  </a>
+  {% endfor %}
+</section>
+{% else %}
+<section class="card empty-panel" aria-label="空项目状态">
+  <div>
+    <svg class="empty-graphic" viewBox="0 0 160 120" fill="none" aria-hidden="true">
+      <path d="M24 82 82 50l54 31-57 33z" fill="#dff3ed"/>
+      <path d="M43 75 84 52l38 22-41 24z" fill="#f4fbf8" stroke="#bbdcd7" stroke-width="4"/>
+      <path d="M75 25c0-8 35-8 35 0v44c0 8-35 8-35 0z" fill="#f7fbfa" stroke="#9eb9b7" stroke-width="4"/>
+      <path d="M75 25c0 8 35 8 35 0" stroke="#9eb9b7" stroke-width="4"/>
+      <path d="M75 40c0 8 35 8 35 0M75 55c0 8 35 8 35 0" stroke="#bccfce" stroke-width="4"/>
+      <path d="M29 72 23 60l-6 12 6 5zM132 68l4-9 5 9-5 4z" fill="#a9ddd3" opacity=".9"/>
+      <path d="M51 86h4M71 74h4M100 85h4" stroke="#a9c8c4" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+    <h3>尚未导入项目</h3>
+    <p>完成首次导入后，这里会显示可检索的数据。</p>
+    <a class="button" href="#import-project"><span aria-hidden="true">＋</span> 导入项目</a>
+  </div>
+</section>
+{% endif %}
+
+<section class="card tool-strip" aria-label="能力入口">
+  <a class="tool-item" href="/projects?library={{ stats.library }}">
+    <span class="tool-icon stat-icon green" aria-hidden="true"><svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-5"/></svg></span>
+    <span><strong>数据安全</strong><span>本地存储，安全可控</span></span>
+  </a>
+  <a class="tool-item" href="/projects?library={{ stats.library }}">
+    <span class="tool-icon stat-icon green" aria-hidden="true"><svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 12 9 5 9-5"/><path d="m3 16 9 5 9-5"/></svg></span>
+    <span><strong>版本管理</strong><span>多版本对比与回溯</span></span>
+  </a>
+  <a class="tool-item" href="/prices?library={{ stats.library }}">
+    <span class="tool-icon stat-icon blue" aria-hidden="true"><svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>
+    <span><strong>智能检索</strong><span>快速定位所需数据</span></span>
+  </a>
+  <a class="tool-item" href="/tasks?library={{ stats.library }}">
+    <span class="tool-icon stat-icon orange" aria-hidden="true"><svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="M12 8v5"/><path d="M12 17h.01"/></svg></span>
+    <span><strong>异常处理</strong><span>及时发现并处理异常</span></span>
+  </a>
+</section>
+
+<section id="import-project" class="action-drawer" aria-label="工作入口">
+  <article class="card action-card">
+    <h3>导入项目</h3>
+    <p>初始化资料库后，可导入样本 Excel 形成可检索的历史数据。</p>
+    <form class="compact-form" method="post" action="/init">
+      <label>资料库路径</label>
+      <input name="library" value="{{ stats.library }}">
+      <button class="button">初始化 / 修复资料库</button>
+    </form>
+    <form class="compact-form" method="post" action="/import-samples">
+      <input type="hidden" name="library" value="{{ stats.library }}">
+      <label>样本目录</label>
+      <input name="samples" value="{{ default_samples }}">
+      <button class="button secondary">导入样本</button>
+    </form>
+  </article>
+
+  <article class="card action-card">
+    <h3>造价数据检索</h3>
+    <p>按名称、地区和类型查询历史价格，生成建议价和参考区间。</p>
+    <form class="compact-form" method="post" action="/query">
+      <input type="hidden" name="library" value="{{ stats.library }}">
+      <label>查询内容</label>
+      <input name="text" value="深圳 C30 商品混凝土多少钱">
+      <label>地区</label>
+      <input name="region" value="深圳">
+      <label>类型</label>
+      <select name="item_type">
+        <option value="">自动 / 全部</option>
+        <option value="labor">人工</option>
+        <option value="material">材料</option>
+        <option value="machinery">机械</option>
+        <option value="equipment">设备</option>
+      </select>
+      <button class="button">检索数据</button>
+    </form>
+  </article>
+
+  <article class="card action-card">
+    <h3>清单匹配</h3>
+    <p>上传新项目人材机表，生成补价建议和候选来源。</p>
+    <form class="compact-form" method="post" action="/price-file" enctype="multipart/form-data">
+      <input type="hidden" name="library" value="{{ stats.library }}">
+      <label>Excel 文件</label>
+      <input type="file" name="file" accept=".xlsx,.xls,.xlsm">
+      <label>项目名称</label>
+      <input name="project_name" value="深圳新项目">
+      <label>地区</label>
+      <input name="region" value="深圳">
+      <label>项目类型</label>
+      <input name="project_type" value="住宅">
+      <label>价格口径</label>
+      <input name="price_scope" value="含税">
+      <label>付款方式</label>
+      <input name="payment_terms" value="">
+      <label>工期</label>
+      <input name="duration" value="18个月，工期偏紧">
+      <button class="button">上传并补价</button>
+    </form>
+  </article>
+</section>
+{% endblock %}

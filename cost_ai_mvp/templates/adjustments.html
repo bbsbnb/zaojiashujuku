@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card" style="padding: 28px;">
+  <div class="page-heading" style="margin-top:0;">
+    <div>
+      <h1>地区系数与政策调价</h1>
+      <p>维护地区、人工、材料、机械和税率类调价系数，并预览对历史价格的影响。</p>
+    </div>
+    <a class="button secondary" href="{{ back }}">返回首页</a>
+  </div>
+  <p class="muted">当前资料库：<code>{{ stats.library }}</code></p>
+</section>
+
+<section class="card" style="padding: 24px; margin-top: 20px;">
+  <h2>新增调价规则</h2>
+  {% if errors %}<ul>{% for error in errors %}<li class="warn">{{ error }}</li>{% endfor %}</ul>{% endif %}
+  <form method="post" action="/adjustments" class="grid" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
+    <input type="hidden" name="library" value="{{ stats.library }}">
+    <div><label>地区</label><input name="region" value="深圳"></div>
+    <div><label>调价名称</label><input name="adjustment_name" placeholder="如 2026人工费调整"></div>
+    <div>
+      <label>类型</label>
+      <select name="adjustment_type">
+        <option value="region">地区综合</option>
+        <option value="labor">人工</option>
+        <option value="material">材料</option>
+        <option value="machinery">机械</option>
+        <option value="tax">税率</option>
+      </select>
+    </div>
+    <div><label>系数</label><input name="coefficient" value="1.00"></div>
+    <div><label>生效日期</label><input name="effective_date" placeholder="YYYY-MM-DD"></div>
+    <div><label>政策编号</label><input name="policy_no" placeholder="文件号/通知号"></div>
+    <div><label>备注</label><input name="notes" placeholder="适用范围、费用口径"></div>
+    <div><button class="button">保存规则</button></div>
+  </form>
+</section>
+
+<section class="card" style="padding: 24px; margin-top: 20px;">
+  <h2>调价影响预览</h2>
+  {% if preview_rows %}
+  <table>
+    <tr><th>地区</th><th>类型</th><th>名称</th><th>单位</th><th>原单价</th><th>规则</th><th>系数</th><th>调后价</th></tr>
+    {% for row in preview_rows %}
+    <tr>
+      <td>{{ row.region }}</td><td>{{ row.item_type }}</td><td>{{ row.item_name }}</td><td>{{ row.unit }}</td>
+      <td>{{ '%.2f'|format(row.unit_price or 0) }}</td><td>{{ row.adjustment_name }}</td><td>{{ row.coefficient }}</td><td>{{ row.adjusted_price }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="muted">暂无可预览的调价影响。请先新增调价规则。</p>
+  {% endif %}
+</section>
+
+<section class="card" style="padding: 24px; margin-top: 20px;">
+  <h2>已启用规则</h2>
+  {% if rows %}
+  <table>
+    <tr><th>地区</th><th>名称</th><th>类型</th><th>系数</th><th>生效日期</th><th>政策编号</th><th>备注</th></tr>
+    {% for row in rows %}
+    <tr><td>{{ row.region }}</td><td>{{ row.adjustment_name }}</td><td>{{ row.adjustment_type }}</td><td>{{ row.coefficient }}</td><td>{{ row.effective_date }}</td><td>{{ row.policy_no or '' }}</td><td>{{ row.notes or '' }}</td></tr>
+    {% endfor %}
+  </table>
+  {% else %}<p class="muted">暂无调价规则。</p>{% endif %}
+</section>
+{% endblock %}

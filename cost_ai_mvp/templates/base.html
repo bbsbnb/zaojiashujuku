@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title or '工程造价数据库' }}</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2300957f'/%3E%3Cpath d='M18 20c0-5 28-5 28 0v22c0 5-28 5-28 0z' fill='none' stroke='%23ffffff' stroke-width='5'/%3E%3Cpath d='M18 20c0 5 28 5 28 0M18 31c0 5 28 5 28 0' fill='none' stroke='%23ffffff' stroke-width='5'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --ink: #101820;
+      --muted: #74808d;
+      --line: #e8edf1;
+      --panel: #ffffff;
+      --teal: #00957f;
+      --teal-dark: #00796c;
+      --nav-bg: #061919;
+      --nav-panel: #123f3b;
+      --green-soft: #e4f8f1;
+      --blue-soft: #eaf2ff;
+      --purple-soft: #f2e9ff;
+      --orange-soft: #fff1dd;
+      --shadow: 0 10px 28px rgba(18, 31, 44, .07);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-width: 1180px;
+      background: #fbfcfd;
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+      letter-spacing: 0;
+    }
+    a { color: inherit; text-decoration: none; }
+    button, input, select { font: inherit; }
+    .app-shell { min-height: 100vh; display: grid; grid-template-columns: 260px 1fr; }
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 24px 16px 18px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 78% 12%, rgba(0, 149, 127, .18), transparent 26%),
+        linear-gradient(180deg, #051719 0%, #061717 100%);
+      color: #f7fffe;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; padding: 0 12px; flex: 0 0 auto; }
+    .brand-mark {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #27d5b2, #00a98d);
+      box-shadow: 0 14px 32px rgba(0, 149, 127, .26);
+    }
+    .brand-title { margin: 0; font-size: 20px; line-height: 1.2; font-weight: 800; }
+    .brand-subtitle { margin-top: 6px; color: rgba(255,255,255,.72); font-size: 13px; font-weight: 600; }
+    .side-nav {
+      margin-top: 24px;
+      display: grid;
+      gap: 8px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-right: 4px;
+      scrollbar-width: thin;
+    }
+    .side-link {
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 14px;
+      border-radius: 8px;
+      color: rgba(255,255,255,.88);
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .side-link:hover, .side-link.active {
+      background: linear-gradient(90deg, rgba(33, 116, 104, .92), rgba(21, 82, 77, .82));
+      box-shadow: inset 3px 0 0 rgba(52, 220, 188, .92);
+    }
+    .side-icon, .mini-icon, .status-icon {
+      width: 26px;
+      height: 26px;
+      display: inline-grid;
+      place-items: center;
+      flex: 0 0 auto;
+    }
+    .sidebar-footer {
+      margin-top: 16px;
+      padding: 16px 12px 0;
+      border-top: 1px solid rgba(255,255,255,.18);
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      color: rgba(255,255,255,.9);
+      flex: 0 0 auto;
+    }
+    .sidebar-footer strong { display: block; font-size: 16px; margin-bottom: 6px; }
+    .sidebar-footer span { color: rgba(255,255,255,.68); font-size: 13px; }
+    .status-dot { display: inline-block; width: 6px; height: 6px; margin-left: 4px; border-radius: 50%; background: #11c99c; }
+    .content { padding: 38px 34px 44px; background: #fbfcfd; }
+    .page-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; }
+    .breadcrumb { color: #9aa3ad; font-size: 16px; font-weight: 600; }
+    .breadcrumb strong { color: #333c45; }
+    .preview-badge {
+      min-height: 38px;
+      padding: 0 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 8px;
+      background: #fff6e7;
+      color: #be6a00;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .page-heading { margin-top: 52px; display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; }
+    .page-heading h1 { margin: 0 0 12px; font-size: 28px; line-height: 1.25; }
+    .page-heading p { margin: 0; color: var(--muted); font-size: 15px; font-weight: 600; }
+    .button {
+      min-height: 46px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 0;
+      border-radius: 8px;
+      padding: 0 18px;
+      background: linear-gradient(180deg, #009986, #007b70);
+      color: #fff;
+      box-shadow: 0 12px 24px rgba(0, 124, 111, .18);
+      cursor: pointer;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .button:hover { filter: brightness(1.03); }
+    .button.secondary {
+      min-height: 40px;
+      background: #fff;
+      color: #2b343d;
+      border: 1px solid var(--line);
+      box-shadow: 0 6px 16px rgba(18,31,44,.05);
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+    .section-title { margin: 44px 0 18px; display: flex; justify-content: space-between; align-items: center; }
+    .section-title h2 { margin: 0 0 8px; padding-left: 16px; border-left: 4px solid #00a98d; font-size: 20px; }
+    .section-title p { margin: 0; color: var(--muted); font-size: 15px; }
+    .grid { display: grid; gap: 18px; }
+    label { display:block; margin-top: 12px; color: #4d5964; font-size: 14px; font-weight: 700; }
+    input, select {
+      width: 100%;
+      margin-top: 6px;
+      padding: 10px 12px;
+      border: 1px solid #d9e1e7;
+      border-radius: 8px;
+      background: #fff;
+      color: #25313b;
+    }
+    table { width: 100%; border-collapse: collapse; margin-top: 14px; background: #fff; }
+    th, td { border-bottom: 1px solid var(--line); padding: 10px; text-align:left; font-size: 13px; vertical-align: top; }
+    th { color:#596775; background:#f7fafc; }
+    code { background: #f4f7f8; padding: 2px 6px; border-radius: 4px; }
+    .muted { color: var(--muted); }
+    .ok { color:#047857; }
+    .warn { color:#b45309; }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+    @media (max-width: 900px) {
+      body { min-width: 0; }
+      .app-shell { display: block; }
+      .sidebar { position: static; height: auto; padding: 22px 16px; }
+      .side-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 22px; }
+      .side-link { min-height: 52px; font-size: 15px; }
+      .sidebar-footer { display: none; }
+      .content { padding: 24px 16px 34px; }
+      .page-heading, .page-top, .section-title { align-items: stretch; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="主导航">
+      {% set nav_library = stats.library if stats is defined else '' %}
+      {% set home_url = url_for('index', library=nav_library) if nav_library else (back if back is defined else url_for('index')) %}
+      <a class="brand" href="{{ home_url }}" aria-label="工程造价数据库首页">
+        <span class="brand-mark" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#06231f" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="7" ry="3"/><path d="M5 5v5c0 1.7 3.1 3 7 3s7-1.3 7-3V5"/><path d="M5 10v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/></svg>
+        </span>
+        <span>
+          <span class="brand-title">工程造价数据库</span>
+          <span class="brand-subtitle">技术预览版 0.1</span>
+        </span>
+      </a>
+      <nav class="side-nav">
+        <a class="side-link {{ 'active' if request.endpoint == 'index' else '' }}" href="{{ home_url }}"><span class="side-icon" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg></span>总览</a>
+        <a class="side-link {{ 'active' if request.endpoint in ['projects_route','project_detail_route'] else '' }}" href="{{ url_for('projects_route', library=nav_library) if nav_library else url_for('projects_route') }}"><span class="side-icon" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16v13H4z"/><path d="M8 7V5h4l2 2"/><circle cx="8" cy="13" r="1"/></svg></span>项目与导入</a>
+        <a class="side-link {{ 'active' if request.endpoint == 'prices_route' else '' }}" href="{{ url_for('prices_route', library=nav_library) if nav_library else url_for('prices_route') }}"><span class="side-icon" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11a7 7 0 1 1 14 0c0 5-7 10-7 10S5 16 5 11Z"/><path d="M9 11h6"/><path d="M12 8v6"/></svg></span>造价数据检索</a>
+        <a class="side-link {{ 'active' if request.endpoint == 'analytics_route' else '' }}" href="{{ url_for('analytics_route', library=nav_library) if nav_library else url_for('analytics_route') }}"><span class="side-icon" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"/><path d="M4 19h16"/><path d="m7 15 3-3 3 2 5-7"/></svg></span>指标趋势分析</a>
+        <a class="side-link {{ 'active' if request.endpoint == 'market_route' else '' }}" href="{{ url_for('market_route', library=nav_library) if nav_library else url_for('market_route') }}"><span class="side-icon" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16"/><path d="M7 16V9"/><path d="M12 16V5"/><path d="M17 16v-4"/></svg></span>材料价格行情</a>
+        <a class="side-link {{ 'active' if request.endpoint == 'adjustments_route' else '' }}" href="{{ url_for('adjustments_route', library=nav_library) if nav_library else url_for('adjustments_route') }}"><span class="side-icon" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M8 7v10"/><path d="M16 7v10"/><path d="M6 17h12"/></svg></span>政策调价</a>
+        <a class="side-link {{ 'active' if request.endpoint in ['reports_route','export_report_route'] else '' }}" href="{{ url_for('reports_route', library=nav_library) if nav_library else url_for('reports_route') }}"><span class="side-icon" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v5h5"/><path d="M10 13h6"/><path d="M10 17h4"/></svg></span>报表导出</a>
+        <a class="side-link {{ 'active' if request.endpoint == 'smart_pricing_route' else '' }}" href="{{ url_for('smart_pricing_route', library=nav_library) if nav_library else url_for('smart_pricing_route') }}"><span class="side-icon" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4"/><path d="M12 17v4"/><path d="M4.22 4.22l2.83 2.83"/><path d="M16.95 16.95l2.83 2.83"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="M7.05 16.95l-2.83 2.83"/><path d="M19.78 4.22l-2.83 2.83"/><circle cx="12" cy="12" r="4"/></svg></span>智能组价</a>
+        <a class="side-link {{ 'active' if request.endpoint == 'audit_route' else '' }}" href="{{ url_for('audit_route', library=nav_library) if nav_library else url_for('audit_route') }}"><span class="side-icon" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11h6"/><path d="M9 15h6"/><path d="M5 3h14v18H5z"/><path d="M9 7h6"/></svg></span>审计日志</a>
+        <a class="side-link {{ 'active' if request.endpoint == 'api_docs_route' else '' }}" href="{{ url_for('api_docs_route', library=nav_library) if nav_library else url_for('api_docs_route') }}"><span class="side-icon" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9 4 12l4 3"/><path d="m16 9 4 3-4 3"/><path d="m14 5-4 14"/></svg></span>只读 API</a>
+        <a class="side-link {{ 'active' if request.endpoint in ['match_route','tasks_route','task_detail_route'] else '' }}" href="{{ url_for('match_route', library=nav_library) if nav_library else url_for('match_route') }}"><span class="side-icon" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h.01"/><path d="M17 7h.01"/><path d="M7 17h.01"/><path d="M17 17h.01"/><path d="M7 7c5 0 5 10 10 10"/><path d="M17 7c-5 0-5 10-10 10"/></svg></span>清单匹配</a>
+        <a class="side-link {{ 'active' if request.endpoint == 'rules_route' else '' }}" href="{{ url_for('rules_route', library=nav_library) if nav_library else url_for('rules_route') }}"><span class="side-icon" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/><path d="M8 5v4"/><path d="M16 10v4"/><path d="M10 15v4"/></svg></span>标准化规则</a>
+        <a class="side-link {{ 'active' if request.endpoint == 'standard_items_route' else '' }}" href="{{ url_for('standard_items_route', library=nav_library) if nav_library else url_for('standard_items_route') }}"><span class="side-icon" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M7 7v13"/><path d="M17 7v13"/><path d="M4 13h16"/></svg></span>标准项维护</a>
+        <a class="side-link {{ 'active' if request.endpoint == 'backup_ai_route' else '' }}" href="{{ url_for('backup_ai_route', library=nav_library) if nav_library else url_for('backup_ai_route') }}"><span class="side-icon" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 8 4v10l-8 4-8-4V7z"/><path d="m12 12 8-5"/><path d="m12 12-8-5"/><path d="v9"/></svg></span>备份与 AI</a>
+      </nav>
+      <div class="sidebar-footer">
+        <span class="status-icon" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-5"/></svg></span>
+        <span><strong>数据保存在本机</strong><span>正在进行本地服务<span class="status-dot"></span></span></span>
+      </div>
+    </aside>
+    <main class="content">{% block content %}{% endblock %}</main>
+  </div>
+</body>
+</html>

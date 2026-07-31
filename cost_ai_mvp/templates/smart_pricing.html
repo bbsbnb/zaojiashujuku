@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card" style="padding: 28px;">
+  <div class="page-heading" style="margin-top:0;">
+    <div>
+      <h1>轻量智能组价</h1>
+      <p>基于历史价格库进行规则化推荐，不调用外部模型，推荐结果需要人工复核后使用。</p>
+    </div>
+    <a class="button secondary" href="{{ back }}">返回首页</a>
+  </div>
+  <p class="muted">当前资料库：<code>{{ stats.library }}</code></p>
+  <form method="post" action="/smart-pricing" class="grid" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
+    <input type="hidden" name="library" value="{{ stats.library }}">
+    <div><label>清单/材料关键词</label><input name="text" value="{{ text }}" placeholder="如 C30、钢筋、普工"></div>
+    <div>
+      <label>地区</label>
+      <select name="region"><option value="">全部</option>{% for r in regions %}<option value="{{ r }}" {% if region == r %}selected{% endif %}>{{ r }}</option>{% endfor %}</select>
+    </div>
+    <div>
+      <label>类型</label>
+      <select name="item_type"><option value="">全部</option>{% for t in item_types %}<option value="{{ t }}" {% if item_type == t %}selected{% endif %}>{{ t }}</option>{% endfor %}</select>
+    </div>
+    <div><button class="button">生成推荐</button></div>
+  </form>
+</section>
+
+<section class="card" style="padding: 24px; margin-top: 20px;">
+  <h2>推荐结果</h2>
+  {% if recommendations %}
+  <table>
+    <tr><th>置信度</th><th>类型</th><th>名称</th><th>规格</th><th>单位</th><th>地区</th><th>样本数</th><th>建议价</th><th>参考区间</th><th>依据</th></tr>
+    {% for row in recommendations %}
+    <tr>
+      <td>{{ row.confidence }}</td><td>{{ row.item_type }}</td><td>{{ row.item_name }}</td><td>{{ row.spec }}</td><td>{{ row.unit }}</td><td>{{ row.region }}</td>
+      <td>{{ row.sample_count }}</td><td>{{ '%.2f'|format(row.avg_price or 0) }}</td><td>{{ '%.2f'|format(row.low_price or 0) }} - {{ '%.2f'|format(row.high_price or 0) }}</td><td>{{ row.recommend_reason }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% elif text %}
+  <p class="muted">未找到可推荐的历史价格，请放宽关键词或地区条件。</p>
+  {% else %}
+  <p class="muted">输入关键词后生成推荐。</p>
+  {% endif %}
+</section>
+{% endblock %}
