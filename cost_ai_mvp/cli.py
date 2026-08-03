@@ -9,6 +9,7 @@ from pathlib import Path
 from .db import connect, init_library, insert_many
 from .excel_io import export_pricing_result, parse_new_project_items, parse_price_excel
 from .matching import build_price_suggestion, candidates_for_item, explanation, search_prices
+from .shaanxi_import import import_shaanxi_price
 from .utils import copy_file, file_hash, new_id, now, rel_to, safe_filename, today_compact
 
 
@@ -69,6 +70,12 @@ def main() -> None:
     p.add_argument("--payment-terms", default="")
     p.add_argument("--duration", default="")
 
+    p = sub.add_parser("import-shaanxi", help="导入陕西造价信息网材料信息价")
+    p.add_argument("--library", required=True)
+    p.add_argument("--source-url", default="")
+    p.add_argument("--pdf-url", default="")
+    p.add_argument("--pdf-path", default="")
+
     args = parser.parse_args()
     library = Path(args.library)
     if args.cmd == "init":
@@ -82,6 +89,17 @@ def main() -> None:
     elif args.cmd == "price-file":
         init_library(library)
         price_file(library, Path(args.input), args.project_name, args.region, args.project_type, args.price_scope, args.payment_terms, args.duration)
+    elif args.cmd == "import-shaanxi":
+        init_library(library)
+        result = import_shaanxi_price(
+            library=library,
+            source_url=args.source_url,
+            pdf_url=args.pdf_url,
+            pdf_path=Path(args.pdf_path) if args.pdf_path else None,
+        )
+        print(result.summary)
+        for line in result.log:
+            print(line)
 
 
 def import_samples(library: Path, samples: Path) -> dict:

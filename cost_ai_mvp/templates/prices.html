@@ -3,6 +3,7 @@
 <section class="card">
   <h2>价格库</h2>
   <p>当前资料库：<code>{{ stats.library }}</code></p>
+  <p><a class="button secondary" href="/import/shaanxi?library={{ stats.library }}">导入陕西信息价</a></p>
   <form method="get" action="/prices" class="grid">
     <input type="hidden" name="library" value="{{ stats.library }}">
     <div>

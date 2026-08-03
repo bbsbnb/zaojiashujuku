@@ -146,6 +146,10 @@
     <span class="tool-icon stat-icon orange" aria-hidden="true"><svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="M12 8v5"/><path d="M12 17h.01"/></svg></span>
     <span><strong>异常处理</strong><span>及时发现并处理异常</span></span>
   </a>
+  <a class="tool-item" href="/import/shaanxi?library={{ stats.library }}">
+    <span class="tool-icon stat-icon blue" aria-hidden="true"><svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 11 4 4 4-4"/><path d="M4 21h16"/></svg></span>
+    <span><strong>陕西导入</strong><span>导入陕西造价信息价</span></span>
+  </a>
 </section>
 
 <section id="import-project" class="action-drawer" aria-label="工作入口">
@@ -207,6 +211,12 @@
       <input name="duration" value="18个月，工期偏紧">
       <button class="button">上传并补价</button>
     </form>
+  </article>
+
+  <article class="card action-card">
+    <h3>陕西导入</h3>
+    <p>从陕西造价信息网导入材料信息价，补充本地价格库。</p>
+    <a class="button" href="/import/shaanxi?library={{ stats.library }}">打开导入页</a>
   </article>
 </section>
 {% endblock %}

@@ -16,6 +16,7 @@ from werkzeug.serving import make_server
 
 from .cli import import_samples, price_file, query
 from .db import connect, init_library
+from .shaanxi_import import import_shaanxi_price
 from .utils import new_id, now, safe_filename, today_compact
 
 
@@ -1444,6 +1445,29 @@ def price_file_route():
         stats=_stats(library),
         back=url_for("index", library=str(library)),
         task_url=url_for("task_detail_route", task_id=result["task_id"], library=str(library)),
+    )
+
+
+@app.route("/import/shaanxi", methods=["GET", "POST"])
+def import_shaanxi_route():
+    library = _library()
+    init_library(library)
+    if request.method == "GET":
+        return render_template("shaanxi_import.html", stats=_stats(library), back=url_for("index", library=str(library)))
+    source_url = request.form.get("source_url", "").strip()
+    pdf_url = request.form.get("pdf_url", "").strip()
+    pdf_path = request.form.get("pdf_path", "").strip()
+    result = import_shaanxi_price(
+        library=library,
+        source_url=source_url,
+        pdf_url=pdf_url,
+        pdf_path=Path(pdf_path) if pdf_path else None,
+    )
+    return render_template(
+        "import_result.html",
+        result={"summary": result.summary, "log": result.log},
+        stats=_stats(library),
+        back=url_for("index", library=str(library)),
     )
 
 

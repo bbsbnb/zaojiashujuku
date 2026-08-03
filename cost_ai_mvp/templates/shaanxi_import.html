@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card" style="padding: 28px;">
+  <div class="page-heading" style="margin-top:0;">
+    <div>
+      <h1>陕西信息价导入</h1>
+      <p>输入详情页、PDF 链接或本地 PDF 路径，导入陕西造价信息网材料信息价。</p>
+    </div>
+    <a class="button secondary" href="{{ back }}">返回首页</a>
+  </div>
+  <form method="post" action="{{ url_for('import_shaanxi_route', library=stats.library) }}" class="grid" style="grid-template-columns: 1fr; max-width: 880px;">
+    <input type="hidden" name="library" value="{{ stats.library }}">
+    <div>
+      <label>详情页 URL</label>
+      <input name="source_url" value="https://js.shaanxi.gov.cn/sy/yw/zjglfw/zjxx/" placeholder="https://js.shaanxi.gov.cn/sy/yw/zjglfw/zjxx/...">
+    </div>
+    <div>
+      <label>PDF URL</label>
+      <input name="pdf_url" placeholder="可选，直接填 PDF 链接也可以">
+    </div>
+    <div>
+      <label>本地 PDF 路径</label>
+      <input name="pdf_path" placeholder="可选，例如 C:\\Users\\Administrator\\Documents\\造价数据库\\output\\sx_sample.pdf">
+    </div>
+    <button class="button" style="width: 220px;">开始导入</button>
+  </form>
+</section>
+{% endblock %}
